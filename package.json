@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "gif-frames": "^1.0.1",
+    "jimp": "^1.6.1"
+  }
+}

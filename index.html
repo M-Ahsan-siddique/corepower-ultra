@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CorePower Ultra — Power, Evolved.</title>
+  <meta name="description" content="CorePower Ultra flagship power bank. Precision-engineered energy with intelligent distribution, blazing fast charging and AI-enhanced power delivery. Designed for mobility, crafted for performance." />
+  <meta name="keywords" content="CorePower Ultra, power bank, fast charging, high capacity, portable charger, USB-C, AI power delivery" />
+  <meta property="og:title" content="CorePower Ultra — Power, Evolved." />
+  <meta property="og:description" content="The world's most advanced portable energy solution. Precision-engineered, intelligently distributed." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════ NAVIGATION ═══════════════ -->
+  <nav id="main-nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <span class="nav-logo-text">CorePower</span>
+        <span class="nav-logo-sub">ULTRA</span>
+      </div>
+
+      <ul class="nav-links" role="list">
+        <li><a href="#overview"     class="nav-link" id="nav-overview">Overview</a></li>
+        <li><a href="#technology"   class="nav-link" id="nav-technology">Technology</a></li>
+        <li><a href="#fast-charging" class="nav-link" id="nav-fast-charging">Fast Charging</a></li>
+        <li><a href="#specs"        class="nav-link" id="nav-specs">Specs</a></li>
+        <li><a href="#buy"          class="nav-link" id="nav-buy">Buy</a></li>
+      </ul>
+
+      <div class="nav-cta-wrap">
+        <a href="#buy" class="nav-cta-btn" id="nav-cta-btn" aria-label="Experience CorePower Ultra">
+          <span>Experience CorePower</span>
+          <svg class="nav-cta-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+
+      <button class="nav-hamburger" id="nav-hamburger" aria-label="Open mobile menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+    <ul class="mobile-menu-links" role="list">
+      <li><a href="#overview"      class="mobile-link" id="mob-overview">Overview</a></li>
+      <li><a href="#technology"    class="mobile-link" id="mob-technology">Technology</a></li>
+      <li><a href="#fast-charging" class="mobile-link" id="mob-fast-charging">Fast Charging</a></li>
+      <li><a href="#specs"         class="mobile-link" id="mob-specs">Specs</a></li>
+      <li><a href="#buy"           class="mobile-link" id="mob-buy">Buy</a></li>
+      <li><a href="#buy"           class="mobile-link mobile-link-cta" id="mob-cta">Experience CorePower</a></li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════ SCROLL STAGE (STICKY CANVAS AREA) ═══════════════ -->
+  <main id="scroll-stage" aria-label="Interactive product story">
+    <!-- Scroll-target anchors for nav links -->
+    <span id="overview"     style="position:absolute;top:0;pointer-events:none"></span>
+    <span id="technology"   style="position:absolute;top:17%;pointer-events:none"></span>
+    <span id="fast-charging" style="position:absolute;top:65%;pointer-events:none"></span>
+
+    <!-- The sticky canvas container — stays glued to viewport during scroll -->
+    <div id="canvas-sticky-wrap">
+      <canvas id="hero-canvas" role="img" aria-label="CorePower Ultra 3D animation"></canvas>
+
+      <!-- Vignette & rim-light overlays for cinematic depth -->
+      <div class="canvas-vignette" aria-hidden="true"></div>
+      <div class="canvas-rim-light" aria-hidden="true"></div>
+      <!-- ── PHASE 0 (0–15%): Hero ── -->
+      <section class="copy-layer" id="copy-hero" aria-label="Hero introduction">
+        <div class="copy-hero-content">
+          <p class="eyebrow" id="hero-eyebrow">Introducing</p>
+          <h1 class="hero-title" id="hero-title">CorePower<br /><em>Ultra</em></h1>
+          <p class="hero-sub" id="hero-sub">Power, evolved.</p>
+          <div class="hero-badges" id="hero-badges" aria-label="Key features">
+            <span class="badge" id="badge-capacity">26,800 mAh</span>
+            <span class="badge-divider" aria-hidden="true">·</span>
+            <span class="badge" id="badge-watt">140W Max</span>
+            <span class="badge-divider" aria-hidden="true">·</span>
+            <span class="badge" id="badge-ports">5 Ports</span>
+          </div>
+          <div class="scroll-hint" id="scroll-hint" aria-label="Scroll to explore">
+            <span class="scroll-hint-text">Scroll to explore</span>
+            <div class="scroll-hint-icon" aria-hidden="true">
+              <div class="scroll-hint-dot"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── PHASE 1 (15–40%): Explosion / Engineering ── -->
+      <section class="copy-layer" id="copy-engineering" aria-label="Engineering section">
+        <div class="copy-side copy-left" id="copy-eng-left">
+          <p class="eyebrow">Phase 01 · Engineering</p>
+          <h2 class="section-title" id="eng-title">Precision-engineered<br />energy.</h2>
+          <p class="section-body" id="eng-body">
+            High-density lithium polymer cells are precision-stacked and thermally managed by a graphene composite heat-spreader. Every millimetre is engineered with intention.
+          </p>
+          <ul class="feature-list" id="eng-features" role="list">
+            <li class="feature-item" id="feat-cells">
+              <span class="feat-icon" aria-hidden="true">◈</span>
+              <span>26,800 mAh high-density cell array</span>
+            </li>
+            <li class="feature-item" id="feat-thermal">
+              <span class="feat-icon" aria-hidden="true">◈</span>
+              <span>Graphene thermal management layer</span>
+            </li>
+            <li class="feature-item" id="feat-weight">
+              <span class="feat-icon" aria-hidden="true">◈</span>
+              <span>Aerospace-grade aluminium shell</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ── PHASE 2 (40–65%): Circuit / Distribution ── -->
+      <section class="copy-layer" id="copy-distribution" aria-label="Distribution section">
+        <div class="copy-side copy-right" id="copy-dist-right">
+          <p class="eyebrow">Phase 02 · Intelligence</p>
+          <h2 class="section-title" id="dist-title">Intelligent<br />distribution,<br />redefined.</h2>
+          <p class="section-body" id="dist-body">
+            Dual USB-C PD 3.1 controllers and a dedicated power management IC orchestrate real-time wattage allocation across all five output ports simultaneously.
+          </p>
+          <ul class="feature-list" id="dist-features" role="list">
+            <li class="feature-item" id="feat-pd">
+              <span class="feat-icon" aria-hidden="true">◈</span>
+              <span>Real-time wattage analysis &amp; allocation</span>
+            </li>
+            <li class="feature-item" id="feat-multi">
+              <span class="feat-icon" aria-hidden="true">◈</span>
+              <span>5-port simultaneous multi-device output</span>
+            </li>
+            <li class="feature-item" id="feat-display">
+              <span class="feat-icon" aria-hidden="true">◈</span>
+              <span>Digital charge indicator with live wattage</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ── PHASE 3 (65–85%): Fast Charging ── -->
+      <section class="copy-layer" id="copy-fastcharge" aria-label="Fast charging section">
+        <div class="copy-center" id="copy-fc-center">
+          <p class="eyebrow">Phase 03 · Speed</p>
+          <h2 class="section-title section-title--large" id="fc-title">Blazing speed.<br />Total safety.</h2>
+          <p class="section-body section-body--wide" id="fc-body">
+            AI-enhanced power delivery negotiates optimal charge profiles for every connected device. Eleven-layer surge protection ensures every joule is delivered safely.
+          </p>
+          <div class="stat-grid" id="stat-grid" role="list" aria-label="Performance statistics">
+            <div class="stat-card" id="stat-wattage" role="listitem">
+              <span class="stat-number">140<span class="stat-unit">W</span></span>
+              <span class="stat-label">Max Output</span>
+            </div>
+            <div class="stat-card" id="stat-charge-time" role="listitem">
+              <span class="stat-number">1.8<span class="stat-unit">hr</span></span>
+              <span class="stat-label">Full Recharge</span>
+            </div>
+            <div class="stat-card" id="stat-devices" role="listitem">
+              <span class="stat-number">5<span class="stat-unit">×</span></span>
+              <span class="stat-label">Simultaneous</span>
+            </div>
+            <div class="stat-card" id="stat-safety" role="listitem">
+              <span class="stat-number">11<span class="stat-unit">×</span></span>
+              <span class="stat-label">Protection Layers</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── PHASE 4 (85–100%): Reassembly / CTA ── -->
+      <section class="copy-layer" id="copy-cta" aria-label="Call to action section">
+        <div class="copy-hero-content" id="cta-content">
+          <p class="eyebrow" id="cta-eyebrow">CorePower Ultra</p>
+          <h2 class="hero-title" id="cta-title">Stay connected.<br /><em>Anywhere.</em></h2>
+          <p class="cta-sub" id="cta-sub">Designed for mobility, crafted for performance.</p>
+          <div class="cta-buttons" id="cta-buttons">
+            <a href="#buy" class="btn-primary" id="btn-experience">
+              <span>Experience CorePower</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+            <a href="#specs" class="btn-secondary" id="btn-specs">See full specs</a>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /canvas-sticky-wrap -->
+
+  </main><!-- /scroll-stage -->
+
+  <!-- ═══════════════ SPECS SECTION ═══════════════ -->
+  <section id="specs" class="specs-section" aria-label="Product specifications">
+    <div class="specs-inner">
+      <p class="eyebrow eyebrow--center">Specifications</p>
+      <h2 class="section-title section-title--center" id="specs-heading">Everything you need to know.</h2>
+      
+      <div class="specs-grid" id="specs-grid" role="list">
+        <div class="spec-card" role="listitem" id="spec-capacity">
+          <div class="spec-icon" aria-hidden="true">⚡</div>
+          <h3 class="spec-title">Capacity</h3>
+          <p class="spec-value">26,800 mAh</p>
+          <p class="spec-detail">96.5 Wh total energy</p>
+        </div>
+        <div class="spec-card" role="listitem" id="spec-output">
+          <div class="spec-icon" aria-hidden="true">🔋</div>
+          <h3 class="spec-title">Max Output</h3>
+          <p class="spec-value">140W</p>
+          <p class="spec-detail">USB-C PD 3.1 EPR</p>
+        </div>
+        <div class="spec-card" role="listitem" id="spec-input">
+          <div class="spec-icon" aria-hidden="true">⚙️</div>
+          <h3 class="spec-title">Recharge Speed</h3>
+          <p class="spec-value">1.8 hours</p>
+          <p class="spec-detail">Via 100W+ USB-C input</p>
+        </div>
+        <div class="spec-card" role="listitem" id="spec-ports">
+          <div class="spec-icon" aria-hidden="true">🔌</div>
+          <h3 class="spec-title">Ports</h3>
+          <p class="spec-value">5 Total</p>
+          <p class="spec-detail">2× USB-C · 3× USB-A</p>
+        </div>
+        <div class="spec-card" role="listitem" id="spec-weight">
+          <div class="spec-icon" aria-hidden="true">🏋️</div>
+          <h3 class="spec-title">Weight</h3>
+          <p class="spec-value">486g</p>
+          <p class="spec-detail">Aerospace aluminium body</p>
+        </div>
+        <div class="spec-card" role="listitem" id="spec-safety">
+          <div class="spec-icon" aria-hidden="true">🛡️</div>
+          <h3 class="spec-title">Safety</h3>
+          <p class="spec-value">11-Layer</p>
+          <p class="spec-detail">Surge · OVP · OCP · NTC</p>
+        </div>
+        <div class="spec-card" role="listitem" id="spec-display">
+          <div class="spec-icon" aria-hidden="true">📊</div>
+          <h3 class="spec-title">Display</h3>
+          <p class="spec-value">Digital LED</p>
+          <p class="spec-detail">Live wattage + charge %</p>
+        </div>
+        <div class="spec-card" role="listitem" id="spec-warranty">
+          <div class="spec-icon" aria-hidden="true">✓</div>
+          <h3 class="spec-title">Warranty</h3>
+          <p class="spec-value">3 Years</p>
+          <p class="spec-detail">Global coverage included</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ BUY SECTION ═══════════════ -->
+  <section id="buy" class="buy-section" aria-label="Purchase section">
+    <div class="buy-inner">
+      <div class="buy-glow" aria-hidden="true"></div>
+      <p class="eyebrow eyebrow--center">Get yours today</p>
+      <h2 class="section-title section-title--center" id="buy-heading">CorePower Ultra.</h2>
+      <p class="buy-sub" id="buy-sub">The most advanced portable power ever engineered.</p>
+
+      <div class="buy-card" id="buy-card">
+        <div class="buy-card-header">
+          <span class="buy-badge-new">New 2026</span>
+        </div>
+        <div class="buy-card-product">
+          <div class="buy-product-info">
+            <h3 class="buy-product-name" id="buy-product-name">CorePower Ultra</h3>
+            <p class="buy-product-cap" id="buy-product-cap">26,800 mAh · 140W Max · Charcoal Gray</p>
+            <ul class="buy-features-list" id="buy-features-list" role="list">
+              <li id="buy-feat-1">✦ 5-Port simultaneous charging</li>
+              <li id="buy-feat-2">✦ AI-enhanced power delivery</li>
+              <li id="buy-feat-3">✦ 11-layer surge protection</li>
+              <li id="buy-feat-4">✦ 3-year global warranty</li>
+            </ul>
+          </div>
+          <div class="buy-price-wrap">
+            <p class="buy-price" id="buy-price">$249<span class="buy-price-sub">.00</span></p>
+            <p class="buy-price-note" id="buy-price-note">Free global shipping</p>
+            <a href="#" class="btn-primary btn-buy" id="btn-buy-now">
+              <span>Order Now</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+            <a href="#specs" class="buy-specs-link" id="buy-specs-link">Compare specs →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="nav-logo-text">CorePower</span>
+        <span class="nav-logo-sub">ULTRA</span>
+      </div>
+      <nav class="footer-links" aria-label="Footer navigation">
+        <a href="#overview" class="footer-link" id="foot-overview">Overview</a>
+        <a href="#specs"    class="footer-link" id="foot-specs">Specs</a>
+        <a href="#buy"      class="footer-link" id="foot-buy">Buy</a>
+        <a href="#"         class="footer-link" id="foot-support">Support</a>
+        <a href="#"         class="footer-link" id="foot-privacy">Privacy</a>
+      </nav>
+      <p class="footer-copy">© 2026 CorePower Technologies Inc. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
