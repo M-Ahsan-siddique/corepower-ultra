@@ -111,15 +111,21 @@ function hideLoadingScreen() {
 
 function loadSingleFrame(idx) {
   return new Promise(function(resolve) {
-    if (frames[idx] && frames[idx].complete) return resolve(frames[idx]);
+    if (frames[idx] && frames[idx].complete && frames[idx].naturalWidth > 0) {
+      return resolve(frames[idx]);
+    }
     const img = new Image();
     img.decoding = 'async';
-    img.onload = img.onerror = function() {
+    img.onload = function() {
       frames[idx] = img;
       if (Math.abs(idx - displayFrame) < 4) {
         lastDrawnIdx = -1;
       }
       resolve(img);
+    };
+    img.onerror = function() {
+      console.warn('Frame failed to load:', idx);
+      resolve(null);
     };
     img.src = FRAMES_DIR + FRAME_PREFIX + pad4(idx) + FRAME_EXT;
     frames[idx] = img;
@@ -128,43 +134,33 @@ function loadSingleFrame(idx) {
 
 async function loadFrames() {
   // Step 1: Load frame 0 immediately and render it!
-  await loadSingleFrame(0);
-  lastDrawnIdx = -1;
-  renderFrame(0);
-  setLoadPct(15);
+  try {
+    await loadSingleFrame(0);
+    lastDrawnIdx = -1;
+    renderFrame(0);
+  } catch (e) {
+    console.error('Frame 0 load error:', e);
+  }
 
-  // Step 2: Load keyframes (every 4th frame) so scroll animation is instantly functional
+  // Safety: dismiss loading screen after max 600ms so screen is NEVER blocked by loader
+  setTimeout(hideLoadingScreen, 600);
+
+  // Step 2: Load keyframes progressively (every 4th frame)
   const keyframeIndices = [];
   for (let i = 0; i < TOTAL_FRAMES; i += 4) {
     keyframeIndices.push(i);
   }
 
-  let keyCount = 0;
-  await Promise.all(keyframeIndices.map(async function(idx) {
-    await loadSingleFrame(idx);
-    keyCount++;
-    setLoadPct(15 + (keyCount / keyframeIndices.length) * 55);
-  }));
+  keyframeIndices.forEach(function(idx) {
+    loadSingleFrame(idx);
+  });
 
-  // Keyframes ready! Unlock experience immediately
-  allLoaded = true;
-  hideLoadingScreen();
-
-  // Step 3: Load remaining intermediate frames seamlessly in background
-  const remaining = [];
+  // Step 3: Load remaining frames in background
   for (let i = 0; i < TOTAL_FRAMES; i++) {
-    if (!frames[i] || !frames[i].complete) {
-      remaining.push(i);
+    if (i % 4 !== 0) {
+      loadSingleFrame(i);
     }
   }
-
-  let remCount = 0;
-  remaining.forEach(function(idx) {
-    loadSingleFrame(idx).then(function() {
-      remCount++;
-      setLoadPct(70 + (remCount / remaining.length) * 30);
-    });
-  });
 }
 
 /* ══════════════════════════════════════════════
