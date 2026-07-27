@@ -55,7 +55,8 @@ html {
 html, body {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden !important;
+  /* overflow-x: clip prevents horizontal overflow WITHOUT breaking position: sticky */
+  overflow-x: clip;
   position: relative;
 }
 
@@ -298,13 +299,15 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 }
 
 #canvas-sticky-wrap {
+  position: -webkit-sticky;
   position: sticky;
   top: 0;
   left: 0;
   width: 100%;
   height: 100vh;
+  z-index: 2;
   overflow: hidden;
-  background: #000000; /* pure black for best mix-blend-mode: screen performance */
+  background: #000000;
 }
 
 #hero-canvas {
