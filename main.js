@@ -376,16 +376,14 @@ function tick() {
     updatePhaseDots(p);
   }
 
-  // Smooth frame interpolation
-  if (allLoaded) {
-    const diff = targetFrame - displayFrame;
-    if (Math.abs(diff) > 0.15) {
-      displayFrame = lerp(displayFrame, targetFrame, LERP_SPEED);
-      renderFrame(displayFrame);
-    } else if (Math.abs(diff) > 0.01) {
-      displayFrame = targetFrame;
-      renderFrame(displayFrame);
-    }
+  // Smooth frame interpolation — ALWAYS render available frames
+  const diff = targetFrame - displayFrame;
+  if (Math.abs(diff) > 0.1) {
+    displayFrame = lerp(displayFrame, targetFrame, LERP_SPEED);
+    renderFrame(displayFrame);
+  } else if (displayFrame !== targetFrame) {
+    displayFrame = targetFrame;
+    renderFrame(displayFrame);
   }
 
   rafId = requestAnimationFrame(tick);
