@@ -101,22 +101,69 @@ function hideLoadingScreen() {
    FRAME PRELOADER
    ══════════════════════════════════════════════ */
 
-function loadFrames() {
+/* ══════════════════════════════════════════════
+   FRAME PRELOADER (Progressive & Non-Blocking)
+   - Loads frame 0 first so hero renders instantly (<200ms)
+   - Loads keyframes (every 4th frame) for instant mobile interactivity
+   - Loads remaining frames in background
+   - Nearest-frame fallback prevents black screen on slow networks
+   ══════════════════════════════════════════════ */
+
+function loadSingleFrame(idx) {
   return new Promise(function(resolve) {
-    let done = 0;
-    for (let i = 0; i < TOTAL_FRAMES; i++) {
-      const img = new Image();
-      img.decoding = 'async';
-      (function(idx, image) {
-        image.onload = image.onerror = function() {
-          done++;
-          setLoadPct((done / TOTAL_FRAMES) * 100);
-          if (done === TOTAL_FRAMES) { allLoaded = true; resolve(); }
-        };
-        image.src = FRAMES_DIR + FRAME_PREFIX + pad4(idx) + FRAME_EXT;
-        frames[idx] = image;
-      })(i, img);
+    if (frames[idx] && frames[idx].complete) return resolve(frames[idx]);
+    const img = new Image();
+    img.decoding = 'async';
+    img.onload = img.onerror = function() {
+      frames[idx] = img;
+      if (Math.abs(idx - displayFrame) < 4) {
+        lastDrawnIdx = -1;
+      }
+      resolve(img);
+    };
+    img.src = FRAMES_DIR + FRAME_PREFIX + pad4(idx) + FRAME_EXT;
+    frames[idx] = img;
+  });
+}
+
+async function loadFrames() {
+  // Step 1: Load frame 0 immediately and render it!
+  await loadSingleFrame(0);
+  lastDrawnIdx = -1;
+  renderFrame(0);
+  setLoadPct(15);
+
+  // Step 2: Load keyframes (every 4th frame) so scroll animation is instantly functional
+  const keyframeIndices = [];
+  for (let i = 0; i < TOTAL_FRAMES; i += 4) {
+    keyframeIndices.push(i);
+  }
+
+  let keyCount = 0;
+  await Promise.all(keyframeIndices.map(async function(idx) {
+    await loadSingleFrame(idx);
+    keyCount++;
+    setLoadPct(15 + (keyCount / keyframeIndices.length) * 55);
+  }));
+
+  // Keyframes ready! Unlock experience immediately
+  allLoaded = true;
+  hideLoadingScreen();
+
+  // Step 3: Load remaining intermediate frames seamlessly in background
+  const remaining = [];
+  for (let i = 0; i < TOTAL_FRAMES; i++) {
+    if (!frames[i] || !frames[i].complete) {
+      remaining.push(i);
     }
+  }
+
+  let remCount = 0;
+  remaining.forEach(function(idx) {
+    loadSingleFrame(idx).then(function() {
+      remCount++;
+      setLoadPct(70 + (remCount / remaining.length) * 30);
+    });
   });
 }
 
@@ -126,8 +173,6 @@ function loadFrames() {
 
 function setupCanvas() {
   canvas = document.getElementById('hero-canvas');
-
-  // alpha: true is REQUIRED for mix-blend-mode: screen transparency
   ctx = canvas.getContext('2d', { alpha: true });
 
   sizeCanvas();
@@ -156,8 +201,7 @@ function sizeCanvas() {
 }
 
 /* ══════════════════════════════════════════════
-   FRAME RENDERER
-   Uses integer frame index, skips if same frame
+   FRAME RENDERER (Nearest-Frame Fallback)
    ══════════════════════════════════════════════ */
 
 let lastDrawnIdx = -1;
@@ -165,26 +209,43 @@ let lastDrawnIdx = -1;
 function renderFrame(frameFloat) {
   if (canvasW === 0 || canvasH === 0) { sizeCanvas(); if (canvasW === 0) return; }
 
-  const idx = clamp(Math.round(frameFloat), 0, TOTAL_FRAMES - 1);
+  const targetIdx = clamp(Math.round(frameFloat), 0, TOTAL_FRAMES - 1);
 
-  if (!allLoaded) {
-    // Black placeholder
-    ctx.clearRect(0, 0, canvasW, canvasH);
-    return;
+  // Find target frame or nearest loaded frame
+  let img = frames[targetIdx];
+  let drawIdx = targetIdx;
+
+  if (!img || !img.complete || img.naturalWidth === 0) {
+    let found = false;
+    for (let offset = 1; offset < TOTAL_FRAMES; offset++) {
+      const down = targetIdx - offset;
+      const up   = targetIdx + offset;
+      if (down >= 0 && frames[down] && frames[down].complete && frames[down].naturalWidth > 0) {
+        img = frames[down];
+        drawIdx = down;
+        found = true;
+        break;
+      }
+      if (up < TOTAL_FRAMES && frames[up] && frames[up].complete && frames[up].naturalWidth > 0) {
+        img = frames[up];
+        drawIdx = up;
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      ctx.clearRect(0, 0, canvasW, canvasH);
+      return;
+    }
   }
 
-  if (idx === lastDrawnIdx) return;
-  lastDrawnIdx = idx;
+  if (drawIdx === lastDrawnIdx) return;
+  lastDrawnIdx = drawIdx;
 
-  const img = frames[idx];
-  if (!img || !img.complete || img.naturalWidth === 0) return;
-
-  // Clear to transparent (frames are PNG with transparency)
   ctx.clearRect(0, 0, canvasW, canvasH);
 
-  // Object-contain: fit frame inside canvas without any clipping
+  // Object-contain: fit frame inside canvas without clipping
   const scale = Math.min(canvasW / img.naturalWidth, canvasH / img.naturalHeight);
-
   const dw    = img.naturalWidth  * scale;
   const dh    = img.naturalHeight * scale;
   const dx    = (canvasW - dw) / 2;
@@ -507,20 +568,7 @@ async function init() {
 
   setupCanvas();
 
-  // Start rAF immediately (draws transparent canvas while loading)
-  rafId = requestAnimationFrame(tick);
-
-  // Show nav after brief delay
-  setTimeout(function() { if (nav) nav.classList.add('nav-visible'); }, 500);
-
-  // Load all 192 transparent frames
-  await loadFrames();
-
-  // Force immediate render now frames are ready
-  displayFrame = -1;
-  lastProgress = -1;
-  renderFrame(0);
-
+  // Initialize UI controls & interactions immediately so mobile hamburger nav works right away
   setupMobileMenu();
   setupAnchors();
   setupEntranceAnims();
@@ -528,13 +576,16 @@ async function init() {
   setupCursorGlow();
   buildPhaseDots();
 
-  // Wire phase-dot update into the rAF tick
-  const origUpdateCopy = updateCopyLayers;
+  // Start rAF loop immediately
+  rafId = requestAnimationFrame(tick);
 
-  hideLoadingScreen();
+  // Show nav
+  setTimeout(function() { if (nav) nav.classList.add('nav-visible'); }, 300);
 
-  console.log('[CorePower v3] Ready — 192 frames, 1400vh scroll, transparent canvas');
-  console.log('[CorePower v3] ScrollStage height:', scrollStage ? scrollStage.scrollHeight : 'null');
+  // Progressive frame loader (renders frame 0 in <200ms and unlocks scrollytelling as keyframes arrive)
+  loadFrames();
+
+  console.log('[CorePower v3] Ready — Progressive preloader & fallback active');
 }
 
 // Boot
