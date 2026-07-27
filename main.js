@@ -182,12 +182,8 @@ function renderFrame(frameFloat) {
   // Clear to transparent (frames are PNG with transparency)
   ctx.clearRect(0, 0, canvasW, canvasH);
 
-  // Object-contain with mobile portrait boost
-  let scale = Math.min(canvasW / img.naturalWidth, canvasH / img.naturalHeight);
-  if (canvasW < 768 && canvasW < canvasH) {
-    // Boost scale on portrait phone screens so the 3D product fills the display
-    scale = scale * 1.38;
-  }
+  // Object-contain: fit frame inside canvas without any clipping
+  const scale = Math.min(canvasW / img.naturalWidth, canvasH / img.naturalHeight);
 
   const dw    = img.naturalWidth  * scale;
   const dh    = img.naturalHeight * scale;
