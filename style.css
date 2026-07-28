@@ -308,6 +308,9 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   z-index: 2;
   overflow: hidden;
   background: #000000;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
 #hero-canvas {
@@ -316,8 +319,10 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   width: 100%;
   height: 100%;
   will-change: transform;
-  transform: translateZ(0);
-  /* No mix-blend-mode — direct compositing for maximum sharpness */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  image-rendering: -webkit-optimize-contrast;
+  /* Direct compositing for maximum sharpness and zero frame drop */
 }
 
 /* —— Cinematic vignette: very subtle, only darkens extreme edges —— */
@@ -364,7 +369,9 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  /* Each layer starts invisible and transitions in/out via JS */
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
 }
 
 /* Hero center copy */

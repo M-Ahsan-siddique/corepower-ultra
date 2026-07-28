@@ -174,6 +174,7 @@ function setupCanvas() {
   sizeCanvas();
   window.addEventListener('resize', function() {
     sizeCanvas();
+    updateStageMetrics();
     displayFrame = -1; // force redraw
   }, { passive: true });
 }
@@ -253,24 +254,27 @@ function renderFrame(frameFloat) {
 }
 
 /* ══════════════════════════════════════════════
-   SCROLL PROGRESS
+   SCROLL PROGRESS (Cached & Layout-Thrash Free)
    ══════════════════════════════════════════════ */
 
-function getScrollProgress() {
-  if (!scrollStage) return 0;
+let cachedStageTop = 0;
+let cachedStageH   = 0;
 
-  // Walk offsetParent chain to get absolute top of scroll stage
+function updateStageMetrics() {
+  if (!scrollStage) return;
   let stageTop = 0;
   let el = scrollStage;
   while (el && el !== document.body) {
     stageTop += el.offsetTop;
     el = el.offsetParent;
   }
+  cachedStageTop = stageTop;
+  cachedStageH   = Math.max(1, scrollStage.scrollHeight - window.innerHeight);
+}
 
-  const stageH  = scrollStage.scrollHeight - window.innerHeight;
-  if (stageH <= 0) return 0;
-
-  return clamp((window.scrollY - stageTop) / stageH, 0, 1);
+function getScrollProgress() {
+  if (cachedStageH <= 0) return 0;
+  return clamp((window.scrollY - cachedStageTop) / cachedStageH, 0, 1);
 }
 
 /* ══════════════════════════════════════════════
@@ -327,7 +331,7 @@ function setLayer(id, opacity, tx, ty) {
   const child = el.firstElementChild;
   if (child) {
     child.style.transform = (tx !== 0 || ty !== 0)
-      ? `translate(${tx}px,${ty}px)`
+      ? `translate3d(${tx}px,${ty}px,0)`
       : '';
   }
 }
@@ -358,7 +362,7 @@ function updateProgressBar(p) {
    toward targetFrame — gives a buttery "settling" feel
    ══════════════════════════════════════════════ */
 
-const LERP_SPEED = 0.14; // 0=never moves, 1=instant snap
+const LERP_SPEED = 0.16; // Optimized for buttery 60/120/144Hz displays
 
 function tick() {
   const p = getScrollProgress();
@@ -374,7 +378,7 @@ function tick() {
 
   // Smooth frame interpolation — ALWAYS render available frames
   const diff = targetFrame - displayFrame;
-  if (Math.abs(diff) > 0.1) {
+  if (Math.abs(diff) > 0.05) {
     displayFrame = lerp(displayFrame, targetFrame, LERP_SPEED);
     renderFrame(displayFrame);
   } else if (displayFrame !== targetFrame) {
@@ -559,6 +563,7 @@ async function init() {
 
   nav         = document.getElementById('main-nav');
   scrollStage = document.getElementById('scroll-stage');
+  updateStageMetrics();
 
   setupCanvas();
 
