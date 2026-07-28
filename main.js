@@ -18,9 +18,9 @@
    ══════════════════════════════════════════════ */
 
 const TOTAL_FRAMES = 192;
-const FRAMES_DIR   = 'frames-transparent/';
+const FRAMES_DIR   = 'frames-webp/';
 const FRAME_PREFIX = 'frame_';
-const FRAME_EXT    = '.png';
+const FRAME_EXT    = '.webp';
 
 // Copy layers appear at these scroll progress points [0..1]
 // The scroll stage is 1400vh; progress goes 0 → 1 across all of it.
@@ -241,8 +241,11 @@ function renderFrame(frameFloat) {
 
   ctx.clearRect(0, 0, canvasW, canvasH);
 
-  // Object-contain: fit frame inside canvas without clipping
-  const scale = Math.min(canvasW / img.naturalWidth, canvasH / img.naturalHeight);
+  // Object-contain with framing margin (zoom-out factor):
+  // 0.78 scale on desktop / 0.86 on mobile gives elegant padding, prevents model crowding
+  // near navbar/text layers, and renders crisp HD 1200x675 details on all displays.
+  const zoomFactor = canvasW <= 768 ? 0.86 : 0.78;
+  const scale = Math.min(canvasW / img.naturalWidth, canvasH / img.naturalHeight) * zoomFactor;
   const dw    = img.naturalWidth  * scale;
   const dh    = img.naturalHeight * scale;
   const dx    = (canvasW - dw) / 2;
