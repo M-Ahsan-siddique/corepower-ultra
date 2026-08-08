@@ -1,9 +1,14 @@
 {
+  "scripts": {
+    "dev": "vite"
+  },
   "devDependencies": {
     "gif-frames": "^1.0.1",
-    "jimp": "^1.6.1"
+    "jimp": "^1.6.1",
+    "vite": "^8.2.1"
   },
   "dependencies": {
+    "firebase": "^12.17.1",
     "sharp": "^0.35.3"
   }
 }

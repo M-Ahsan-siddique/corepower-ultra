@@ -1,15 +1,19 @@
-/**
- * CorePower Ultra — Scrollytelling Engine  v3.0
- * main.js
- *
- * What changed in v3:
- *  - 192 frames (all GIF frames, not sampled)
- *  - Transparent PNG frames + alpha canvas + mix-blend-mode:screen for floating product
- *  - 1400vh scroll height = very deliberate, cinematic scroll pace
- *  - LINEAR frame mapping: scrollProgress * (TOTAL_FRAMES-1) = frameIndex
- *  - Momentum/easing: current frame interpolates toward target at 0.12 lerp
- *  - Copy layers appear at specific progress points
- */
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDGgqSjWKaRYHCy6T_NfpVkIlOhtZEpWnE",
+  authDomain: "corepowerultra.firebaseapp.com",
+  projectId: "corepowerultra",
+  storageBucket: "corepowerultra.firebasestorage.app",
+  messagingSenderId: "797316363669",
+  appId: "1:797316363669:web:563ff9fb34da56cc1f329c",
+  measurementId: "G-CE2EQ6W7VY"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 'use strict';
 
@@ -23,7 +27,7 @@ const FRAME_PREFIX = 'frame_';
 const FRAME_EXT    = '.webp';
 
 // Copy layers appear at these scroll progress points [0..1]
-// The scroll stage is 1400vh; progress goes 0 → 1 across all of it.
+// The scroll stage is 600vh; progress goes 0 → 1 across all of it.
 const PHASES = {
   hero:         { start: 0.00, end: 0.13 },
   engineering:  { start: 0.13, end: 0.37 },
@@ -472,7 +476,7 @@ function spawnParticles() {
 function setupCursorGlow() {
   if (window.matchMedia('(hover:none)').matches) return;
   const g = document.createElement('div');
-  g.style.cssText = 'position:fixed;pointer-events:none;z-index:9998;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(0,80,255,0.06) 0%,transparent 65%);transform:translate(-50%,-50%);';
+  g.style.cssText = 'position:fixed;pointer-events:none;z-index:9998;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,var(--accent-glow-cursor) 0%,transparent 65%);transform:translate(-50%,-50%);';
   document.body.appendChild(g);
   window.addEventListener('mousemove', function(e) {
     g.style.left = e.clientX + 'px';
@@ -487,10 +491,17 @@ function setupCursorGlow() {
 function setupAnchors() {
   document.querySelectorAll('a[href^="#"]').forEach(function(a) {
     a.addEventListener('click', function(e) {
-      const t = document.querySelector(a.getAttribute('href'));
-      if (!t) return;
-      e.preventDefault();
-      t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const href = a.getAttribute('href');
+      if (href === '#') return;
+      try {
+        const t = document.querySelector(href);
+        if (t) {
+          e.preventDefault();
+          t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } catch (err) {
+        console.warn("Invalid scroll target selector:", href);
+      }
     });
   });
 }
@@ -546,7 +557,7 @@ function updatePhaseDots(p) {
     if (!el) return;
     const ph = PHASES[PHASE_KEYS[i]];
     const active = p >= ph.start - 0.01 && p <= ph.end + 0.01;
-    el.style.background = active ? '#00D6FF' : 'rgba(255,255,255,0.2)';
+    el.style.background = active ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.2)';
     el.style.transform  = active ? 'scale(1.8)' : 'scale(1)';
   });
 }
@@ -577,6 +588,8 @@ async function init() {
   spawnParticles();
   setupCursorGlow();
   buildPhaseDots();
+  setupThemeSwitcher();
+  setupOrderModal();
 
   // Start rAF loop immediately
   rafId = requestAnimationFrame(tick);
@@ -588,6 +601,331 @@ async function init() {
   loadFrames();
 
   console.log('[CorePower v3] Ready — Progressive preloader & fallback active');
+}
+
+function setupThemeSwitcher() {
+  const dots = document.querySelectorAll('#theme-switcher .theme-dot');
+  
+  // Retrieve saved theme or default to cyan
+  const savedTheme = localStorage.getItem('corepower-theme') || 'cyan';
+  setTheme(savedTheme);
+  
+  dots.forEach(dot => {
+    dot.addEventListener('click', function() {
+      const theme = this.getAttribute('data-theme');
+      setTheme(theme);
+    });
+  });
+  
+  function setTheme(theme) {
+    // Remove all theme classes from body
+    document.body.classList.remove('theme-cyan', 'theme-gold', 'theme-violet', 'theme-emerald');
+    
+    // Add selected theme class
+    if (theme !== 'cyan') {
+      document.body.classList.add('theme-' + theme);
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('corepower-theme', theme);
+    
+    // Update active state in UI
+    dots.forEach(dot => {
+      if (dot.getAttribute('data-theme') === theme) {
+        dot.classList.add('active');
+      } else {
+        dot.classList.remove('active');
+      }
+    });
+    
+    // Force canvas redraw
+    displayFrame = -1;
+  }
+}
+
+function setupOrderModal() {
+  if (window.emailjs) {
+    emailjs.init({
+      publicKey: "6ahHslJIlZdmhRorT",
+    });
+  }
+
+  const modal = document.getElementById('order-modal');
+  const orderBtn = document.getElementById('btn-buy-now');
+  const closeBtn = document.getElementById('btn-modal-close');
+  const orderForm = document.getElementById('order-form');
+  const productList = document.getElementById('modal-product-list');
+  const addItemBtn = document.getElementById('btn-add-item');
+  const summaryTotal = document.getElementById('order-summary-total');
+  
+  // Success state elements
+  const formState = document.getElementById('modal-form-state');
+  const successState = document.getElementById('modal-success-state');
+  const successOrderId = document.getElementById('success-order-id');
+  const successOrderItems = document.getElementById('success-order-items');
+  const successOrderTotal = document.getElementById('success-order-total');
+  const successCloseBtn = document.getElementById('btn-success-close');
+
+  const PRODUCT_PRICE = 249.00;
+  let nextRowId = 0;
+
+  // Open modal
+  if (orderBtn) {
+    orderBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      openModal();
+    });
+  }
+
+  // Close modal
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeModal);
+  }
+
+  // Close success modal
+  if (successCloseBtn) {
+    successCloseBtn.addEventListener('click', closeModal);
+  }
+
+  // Close modal when clicking overlay background
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+    
+    // Close modal on Escape key
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal.classList.contains('active')) {
+        closeModal();
+      }
+    });
+  }
+
+  // Add initial product row
+  function openModal() {
+    // Reset form and errors
+    orderForm.reset();
+    document.querySelectorAll('.form-group').forEach(grp => grp.classList.remove('has-error'));
+    
+    // Reset state views
+    formState.style.display = 'block';
+    successState.style.display = 'none';
+    
+    // Clear dynamic list and add first item
+    productList.innerHTML = '';
+    nextRowId = 0;
+    addProductRow();
+    
+    // Activate modal
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden'; // lock body scroll
+  }
+
+  function closeModal() {
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = ''; // restore scroll
+  }
+
+  // Add Product row function
+  function addProductRow() {
+    const rowId = nextRowId++;
+    const row = document.createElement('div');
+    row.className = 'product-item-row';
+    row.id = `product-row-${rowId}`;
+    
+    row.innerHTML = `
+      <div class="form-group" style="margin-bottom: 0;">
+        <select class="item-select" data-row-id="${rowId}">
+          <option value="ultra" selected>CorePower Ultra ($249.00)</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <select class="item-qty" data-row-id="${rowId}">
+          <option value="1" selected>1 Qty</option>
+          <option value="2">2 Qty</option>
+          <option value="3">3 Qty</option>
+          <option value="4">4 Qty</option>
+          <option value="5">5 Qty</option>
+        </select>
+      </div>
+      <button type="button" class="btn-remove-item" data-row-id="${rowId}" aria-label="Remove item">✕</button>
+    `;
+    
+    productList.appendChild(row);
+    
+    // Setup listeners on the new row elements
+    const qtySelect = row.querySelector('.item-qty');
+    qtySelect.addEventListener('change', calculateTotal);
+    
+    const removeBtn = row.querySelector('.btn-remove-item');
+    removeBtn.addEventListener('click', function() {
+      // Don't allow removing if it's the only product row
+      if (productList.querySelectorAll('.product-item-row').length > 1) {
+        row.remove();
+        calculateTotal();
+      } else {
+        alert("Your order must include at least one product.");
+      }
+    });
+
+    calculateTotal();
+  }
+
+  // Handle + Add Another Product
+  if (addItemBtn) {
+    addItemBtn.addEventListener('click', addProductRow);
+  }
+
+  // Calculate order total
+  function calculateTotal() {
+    let total = 0;
+    const rows = productList.querySelectorAll('.product-item-row');
+    rows.forEach(row => {
+      const qty = parseInt(row.querySelector('.item-qty').value) || 1;
+      total += qty * PRODUCT_PRICE;
+    });
+    
+    summaryTotal.textContent = `$${total.toFixed(2)}`;
+    return total;
+  }
+
+  // Handle Form Submission
+  if (orderForm) {
+    const submitBtn = document.getElementById('btn-submit-order');
+    const submitBtnText = submitBtn.querySelector('span');
+
+    orderForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      let isValid = true;
+      const nameInput = document.getElementById('order-name');
+      const emailInput = document.getElementById('order-email');
+      const phoneInput = document.getElementById('order-phone');
+      
+      // Validate Name
+      if (!nameInput.value.trim()) {
+        nameInput.parentElement.classList.add('has-error');
+        isValid = false;
+      } else {
+        nameInput.parentElement.classList.remove('has-error');
+      }
+      
+      // Validate Email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailInput.value.trim() || !emailRegex.test(emailInput.value.trim())) {
+        emailInput.parentElement.classList.add('has-error');
+        isValid = false;
+      } else {
+        emailInput.parentElement.classList.remove('has-error');
+      }
+      
+      // Validate Phone
+      if (!phoneInput.value.trim()) {
+        phoneInput.parentElement.classList.add('has-error');
+        isValid = false;
+      } else {
+        phoneInput.parentElement.classList.remove('has-error');
+      }
+      
+      if (!isValid) return;
+      
+      // Disable button to prevent double clicks
+      submitBtn.disabled = true;
+      if (submitBtnText) submitBtnText.textContent = "Processing order...";
+      
+      // Compute details for success view
+      const rows = productList.querySelectorAll('.product-item-row');
+      let totalQty = 0;
+      const items = [];
+      
+      rows.forEach(row => {
+        const qty = parseInt(row.querySelector('.item-qty').value) || 1;
+        totalQty += qty;
+        items.push({
+          product: "CorePower Ultra",
+          quantity: qty,
+          price: 249.00
+        });
+      });
+      
+      const totalAmount = calculateTotal();
+      const randomOrderId = 'CP-' + Math.floor(10000 + Math.random() * 90000);
+      
+      const orderData = {
+        orderId: randomOrderId,
+        customerName: nameInput.value.trim(),
+        customerEmail: emailInput.value.trim(),
+        customerPhone: phoneInput.value.trim(),
+        items: items,
+        total: totalAmount,
+        status: 'pending',
+        createdAt: serverTimestamp()
+      };
+      
+      const mailData = {
+        to: emailInput.value.trim(),
+        message: {
+          subject: `CorePower Order Confirmed [#${randomOrderId}]`,
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #050505; color: #ffffff; border: 1px solid #1a1a1a; border-radius: 12px;">
+              <h2 style="color: #00D6FF; margin-top: 0;">Order Confirmed!</h2>
+              <p>Hi ${nameInput.value.trim()},</p>
+              <p>Thank you for choosing CorePower. We have received your order and it is currently being processed.</p>
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid #222; border-radius: 8px; padding: 16px; margin: 20px 0;">
+                <p style="margin: 0 0 8px;"><strong>Order ID:</strong> ${randomOrderId}</p>
+                <p style="margin: 0 0 8px;"><strong>Items:</strong> ${totalQty}x CorePower Ultra</p>
+                <p style="margin: 0;"><strong>Total Amount:</strong> $${totalAmount.toFixed(2)}</p>
+              </div>
+              <p style="font-size: 13px; color: #888;">This is an automated confirmation email. You will receive tracking details once your item ships.</p>
+            </div>
+          `
+        }
+      };
+
+      try {
+        // Save to firestore collection
+        await addDoc(collection(db, "orders"), orderData);
+        
+        // Save to mail collection for the trigger-email extension (fallback backup)
+        await addDoc(collection(db, "mail"), mailData);
+        
+        // Send email via EmailJS (100% free SMTP trigger)
+        if (window.emailjs) {
+          const templateParams = {
+            customer_name: nameInput.value.trim(),
+            customer_email: emailInput.value.trim(),
+            customer_phone: phoneInput.value.trim(),
+            order_id: randomOrderId,
+            order_items: `${totalQty}x CorePower Ultra`,
+            order_total: `$${totalAmount.toFixed(2)}`
+          };
+          
+          await emailjs.send("service_zw7qo4c", "template_7e2jil9", templateParams, "6ahHslJIlZdmhRorT");
+          console.log("EmailJS confirmation email triggered successfully");
+        }
+
+        // Populate success view
+        successOrderId.textContent = randomOrderId;
+        successOrderItems.textContent = `${totalQty}x CorePower Ultra`;
+        successOrderTotal.textContent = `$${totalAmount.toFixed(2)}`;
+        
+        // Transition to success screen
+        formState.style.display = 'none';
+        successState.style.display = 'block';
+      } catch (error) {
+        console.error("Error submitting order: ", error);
+        alert("An error occurred while placing your order. Please try again.");
+      } finally {
+        // Restore button state
+        submitBtn.disabled = false;
+        if (submitBtnText) submitBtnText.textContent = "Confirm and Place Order";
+      }
+    });
+  }
 }
 
 // Boot

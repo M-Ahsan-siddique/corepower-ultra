@@ -11,7 +11,7 @@
   <meta property="og:type" content="website" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -312,6 +312,97 @@
     </div>
   </footer>
 
-  <script src="main.js"></script>
+  <!-- Place Order Modal Overlay -->
+  <div class="order-modal-overlay" id="order-modal" aria-hidden="true" role="dialog" aria-labelledby="modal-title">
+    <div class="order-modal-content">
+      <button class="order-modal-close" id="btn-modal-close" aria-label="Close modal">✕</button>
+      
+      <!-- Modal form state -->
+      <div id="modal-form-state">
+        <h2 id="modal-title" class="modal-heading">Place Your Order</h2>
+        <p class="modal-sub">Configure your order details below to secure your CorePower device.</p>
+        
+        <form id="order-form" novalidate>
+          <div class="form-group">
+            <label for="order-name">Full Name</label>
+            <input type="text" id="order-name" name="name" required placeholder="John Doe" />
+            <span class="error-msg" id="name-error">Please enter your name</span>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="order-email">Email Address</label>
+              <input type="email" id="order-email" name="email" required placeholder="john@example.com" />
+              <span class="error-msg" id="email-error">Please enter a valid email</span>
+            </div>
+            
+            <div class="form-group">
+              <label for="order-phone">Phone Number</label>
+              <input type="tel" id="order-phone" name="phone" required placeholder="+1 (555) 000-0000" />
+              <span class="error-msg" id="phone-error">Please enter your phone number</span>
+            </div>
+          </div>
+          
+          <div class="form-products-section">
+            <label>Order Items</label>
+            <div class="product-list" id="modal-product-list">
+              <!-- Dynamically populated rows -->
+            </div>
+            <button type="button" class="btn-add-product" id="btn-add-item">+ Add Another Product</button>
+          </div>
+          
+          <div class="order-summary-box">
+            <span class="summary-label">Total Amount:</span>
+            <span class="summary-total" id="order-summary-total">$249.00</span>
+          </div>
+          
+          <button type="submit" class="btn-primary btn-submit-order" id="btn-submit-order">
+            <span>Confirm and Place Order</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- Success State -->
+      <div id="modal-success-state" style="display: none;">
+        <div class="success-icon">✓</div>
+        <h2 class="modal-heading">Order Placed!</h2>
+        <p class="modal-sub">Thank you for choosing CorePower. Your order has been registered successfully.</p>
+        
+        <div class="success-details">
+          <div class="detail-row">
+            <span class="detail-lbl">Order ID:</span>
+            <span class="detail-val" id="success-order-id">CP-12345</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-lbl">Items:</span>
+            <span class="detail-val" id="success-order-items">1x CorePower Ultra</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-lbl">Total Charged:</span>
+            <span class="detail-val" id="success-order-total">$249.00</span>
+          </div>
+        </div>
+        
+        <button type="button" class="btn-primary btn-success-close" id="btn-success-close">Back to Explore</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Theme Switcher -->
+  <div class="theme-switcher-wrap" id="theme-switcher">
+    <button class="theme-btn-trigger" aria-label="Switch Theme" title="Switch Theme">🎨</button>
+    <div class="theme-options">
+      <div class="theme-dot active" data-theme="cyan" title="Cyber Cyan"></div>
+      <div class="theme-dot" data-theme="gold" title="Luxury Gold"></div>
+      <div class="theme-dot" data-theme="violet" title="Royal Violet"></div>
+      <div class="theme-dot" data-theme="emerald" title="Toxic Emerald"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
